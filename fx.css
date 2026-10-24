@@ -1,0 +1,271 @@
+/* ═══════════════════════════════════════════════════
+   ONLY HUMANS — couche d'effets (d'après Fan Yao v4 « ouf »)
+   ═══════════════════════════════════════════════════ */
+
+/* ── Défilement fluide (Lenis) ── */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+/* ── Écran noir de sécurité avant que fx.js prenne la main (repli si le JS échoue) ── */
+html.fx-first::after,
+html.fx-entering::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 100000;
+  animation: fx-cover-fail 0.4s 4s forwards;
+}
+@keyframes fx-cover-fail { to { opacity: 0; visibility: hidden; } }
+
+/* ── Grain de film ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  z-index: 9990;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: fx-grain 0.9s steps(6) infinite;
+}
+@keyframes fx-grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-6%, 4%); }
+  40% { transform: translate(5%, -7%); }
+  60% { transform: translate(-3%, 8%); }
+  80% { transform: translate(7%, 2%); }
+  100% { transform: translate(-4%, -5%); }
+}
+
+/* ── Barre de progression (une mèche qui brûle) ── */
+#fx-progress {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 9995;
+  background: var(--fire);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  box-shadow: 0 0 14px var(--c-orange);
+  pointer-events: none;
+}
+
+/* ═══ Écran d'ouverture : décompte « 1, 2, 3, 4 ! » puis le H s'embrase ═══ */
+#fx-loader { position: fixed; inset: 0; z-index: 100001; display: grid; place-items: center; background: #000; pointer-events: all; }
+.fx-flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 55%, #ffd200, #f0801e 40%, transparent 75%); opacity: 0; }
+.fx-count {
+  position: absolute;
+  font-family: var(--font-goth);
+  font-size: clamp(9rem, 34vmin, 22rem);
+  line-height: 1;
+  white-space: nowrap;
+  background: var(--fire-v);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 30px rgba(240,128,30,0.6));
+}
+.fx-loader-logo { position: absolute; width: min(62vmin, 520px); height: auto; filter: drop-shadow(0 0 40px rgba(240,128,30,0.7)); }
+.fx-loader-tag {
+  position: absolute;
+  left: clamp(1.25rem, 4vw, 3rem);
+  bottom: clamp(1.25rem, 3vw, 2.25rem);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--c-ash);
+}
+
+/* ═══ Transition entre pages : un mur de flammes qui monte, puis brûle à travers ═══ */
+#fx-trans { position: fixed; inset: 0; z-index: 100000; pointer-events: none; visibility: hidden; overflow: hidden; }
+#fx-trans.on { visibility: visible; pointer-events: all; }
+.fx-burn { position: absolute; left: 0; right: 0; top: 0; height: 100%; background: #000; display: grid; place-items: center; align-content: center; gap: 1rem; }   /* position pilotée par GSAP (y) */
+.fx-burn::before {   /* la crête de flammes, qui danse */
+  content: '';
+  position: absolute;
+  left: -10%; right: -10%;
+  bottom: calc(100% - 2px);
+  height: 28vh;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffd200'/%3E%3Cstop offset='.5' stop-color='%23f0801e'/%3E%3Cstop offset='1' stop-color='%23e3261f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='%23e3261f' opacity='.85' d='M0 100 Q8 50 16 72 Q24 20 34 64 Q42 35 50 70 Q60 8 70 62 Q78 40 86 74 Q96 22 106 66 Q114 44 122 76 Q132 12 142 62 Q150 38 158 72 Q168 26 178 66 Q188 46 200 70 L200 100Z'/%3E%3Cpath fill='url(%23g)' d='M0 100 Q6 66 12 80 Q20 38 28 76 Q36 52 44 82 Q54 30 62 74 Q70 56 78 84 Q88 36 98 78 Q106 58 114 86 Q124 30 134 76 Q142 54 150 84 Q160 40 170 80 Q178 60 186 86 Q194 50 200 82 L200 100Z'/%3E%3C/svg%3E") 0 100% / 50% 100% repeat-x;
+  filter: drop-shadow(0 -8px 24px rgba(240,128,30,0.7));
+  animation: fx-dance 0.5s steps(3) infinite;
+}
+.fx-burn::after {    /* la braise qui reste quand le feu est passé */
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: 100%;
+  height: 22vh;
+  background: linear-gradient(to bottom, rgba(227,38,31,0.75), rgba(240,128,30,0.35) 30%, transparent);
+}
+@keyframes fx-dance {
+  0% { background-position: 0 100%; transform: scaleY(1); }
+  33% { background-position: -7% 100%; transform: scaleY(1.12); }
+  66% { background-position: 4% 100%; transform: scaleY(0.94); }
+  100% { background-position: 0 100%; transform: scaleY(1); }
+}
+.fx-burn-logo { width: min(30vmin, 240px); height: auto; filter: drop-shadow(0 0 30px rgba(240,128,30,0.6)); }
+.fx-burn-label { font-family: var(--font-goth); font-size: clamp(3rem, 11vw, 8.5rem); line-height: 1; color: var(--c-bone); text-shadow: 0 0 40px rgba(240,128,30,0.45); }
+
+/* ═══ Curseur + flammes ═══ */
+#fx-ink { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 9996; pointer-events: none; }
+.fx-cursor-label {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 9997;
+  pointer-events: none;
+  padding: 0.35rem 0.75rem;
+  background: var(--fire);
+  color: #120800;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  opacity: 0;
+  scale: 0.6;
+  transition: opacity 0.2s, scale 0.3s var(--ease-out-expo);
+  box-shadow: 0 0 18px rgba(var(--c-accent-rgb), 0.6);
+}
+.fx-cursor-label.on { opacity: 1; scale: 1; }
+@media (hover: hover) and (pointer: fine) {
+  html.fx-cursor, html.fx-cursor * { cursor: none !important; }
+}
+
+/* ═══ Textes découpés ═══ */
+.fx-word { display: inline-block; white-space: nowrap; }
+.fx-char-wrap { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.14em 0.03em 0.08em; margin: -0.14em -0.03em -0.08em; }
+.fx-char { display: inline-block; will-change: transform; }
+.fx-hw { transition: none; }
+.fx-js .fx-intro { opacity: 0; animation: fx-show 0.01s 6s forwards; }
+@keyframes fx-show { to { opacity: 1; } }
+
+/* ═══ Cartes éclairées / inclinées ═══ */
+.fx-spot { background-image: radial-gradient(420px circle at var(--mx, -999px) var(--my, -999px), rgba(var(--c-accent-rgb), 0.16), transparent 62%); }
+.fx-tilt { transform-style: preserve-3d; will-change: transform; }
+.fx-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(500px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 200, 90, 0.2), transparent 45%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  mix-blend-mode: screen;
+}
+.fx-tilt:hover .fx-glare { opacity: 1; }
+
+/* ═══ En-têtes intérieurs : la scène éclairée par un feu, par en dessous ═══ */
+.fx-heat {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 55% at 50% 115%, rgba(240,128,30,0.55), rgba(227,38,31,0.25) 45%, transparent 75%);
+  mix-blend-mode: screen;
+  animation: fx-flicker 2.6s infinite;
+}
+@keyframes fx-flicker {
+  0%, 100% { filter: brightness(1); transform: scaleY(1); }
+  12% { filter: brightness(1.25); transform: scaleY(1.04); }
+  20% { filter: brightness(0.85); }
+  37% { filter: brightness(1.15); transform: scaleY(0.97); }
+  52% { filter: brightness(0.9); }
+  68% { filter: brightness(1.3); transform: scaleY(1.06); }
+  81% { filter: brightness(0.95); }
+}
+
+/* ═══ ACCUEIL : hero WebGL ═══ */
+#hero-gl { position: absolute; inset: 0; z-index: 1; }
+#hero-gl canvas { display: block; width: 100% !important; height: 100% !important; }
+.fx-js .fx-fallback { display: none; }
+.fx-no-gl .fx-fallback { display: block; }
+.fx-js .hero-index { background: radial-gradient(ellipse 55% 60% at 50% 40%, rgba(240,128,30,0.12), transparent 70%), #000; }
+.fx-js .hero-index .hero-content { pointer-events: none; }
+.fx-js .hero-index .hero-content a { pointer-events: auto; }
+.hero-shape {
+  position: absolute;
+  z-index: 3;
+  right: var(--gutter);
+  top: calc(var(--nav-h) + 1.5rem);
+  text-align: right;
+  display: grid;
+  gap: 0.3rem;
+  pointer-events: none;
+}
+.hero-shape-idx { font-family: var(--font-display); font-size: 14px; font-weight: 700; letter-spacing: 0.3em; color: var(--c-ash2); font-variant-numeric: tabular-nums; }
+.hero-shape-han { font-family: var(--font-goth); font-size: clamp(2.2rem, 4vw, 3.4rem); line-height: 1; color: var(--c-amber); text-shadow: 0 0 24px rgba(var(--c-accent-rgb), 0.6); }
+.hero-shape-txt { font-family: var(--font-display); font-size: 13px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--c-ash); }
+.hero-hint {
+  position: absolute;
+  z-index: 3;
+  right: var(--gutter);
+  bottom: clamp(2rem, 7vh, 4.5rem);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--c-ash2);
+  pointer-events: none;
+  white-space: nowrap;
+}
+@media (max-width: 860px) {
+  .hero-shape { top: calc(var(--nav-h) + 0.75rem); }
+  .hero-hint { display: none; }
+}
+
+/* ═══ ACCUEIL : line-up piloté par le défilement ═══ */
+.fx-lineup { position: relative; background: #000; }
+.fx-lineup-pin {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  align-items: center;
+}
+.fx-lineup canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.fx-lineup-panel { position: relative; z-index: 3; grid-column: 2; padding: 0 var(--gutter) 0 1rem; display: grid; gap: 0.6rem; }
+.fx-lineup-title { font-family: var(--font-goth); font-size: clamp(2.6rem, 5vw, 4.4rem); line-height: 0.95; margin: 0 0 1rem; }
+.fx-lineup-count { font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: 0.3em; color: var(--c-ash2); font-variant-numeric: tabular-nums; }
+.fx-lineup-count b { color: var(--c-amber); }
+.fx-lineup-name { font-family: var(--font-goth); font-size: clamp(4rem, 9vw, 8rem); line-height: 0.9; min-height: 1em; white-space: nowrap; color: var(--c-bone); text-shadow: 0 0 40px rgba(var(--c-accent-rgb), 0.5); }
+.fx-lineup-role { font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--c-amber); }
+.fx-lineup-txt { color: var(--c-ash); max-width: 32ch; min-height: 3em; margin: 0; }
+.fx-lineup-bar { height: 2px; background: var(--c-line); margin-top: 1rem; overflow: hidden; }
+.fx-lineup-bar span { display: block; height: 100%; background: var(--fire); transform-origin: 0 50%; transform: scaleX(0); box-shadow: 0 0 10px var(--c-orange); }
+.fx-lineup-hint { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--c-ash2); margin-top: 0.5rem; }
+@media (max-width: 860px) {
+  .fx-lineup-pin { grid-template-columns: minmax(0, 1fr); align-items: end; }
+  .fx-lineup-panel { grid-column: 1; padding: 2rem 1.25rem 2.5rem; background: linear-gradient(to top, #000 55%, transparent); gap: 0.35rem; }
+  .fx-lineup-title { display: none; }
+  .fx-lineup-name { font-size: 4rem; }
+}
+
+/* ═══ ACCUEIL : galerie en colonnes ═══ */
+.fx-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.5rem, 1.5vw, 1.25rem);
+  height: clamp(520px, 90vh, 900px);
+  overflow: hidden;
+}
+.fx-col { display: grid; gap: clamp(0.5rem, 1.5vw, 1.25rem); align-content: start; will-change: transform; }
+.fx-col figure { margin: 0; overflow: hidden; aspect-ratio: 3 / 4; background: var(--c-ink2); }
+.fx-col figure:nth-child(2n) { aspect-ratio: 4 / 5; }
+.fx-col img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.12); }
+@media (max-width: 600px) {
+  .fx-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fx-col:nth-child(3) { display: none; }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  body::after, .fx-heat, .fx-burn::before { animation: none; }
+  .fx-js .fx-intro { opacity: 1; animation: none; }
+}
